@@ -1,1 +1,1 @@
-export {default as  ComponentDemo} from './ComponentDemo'
+export {default as  Loading} from './Loading'

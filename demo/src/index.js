@@ -26,7 +26,7 @@ render(
                 
                  
                 <Redirect to='/admin' from='/' exact   />
-                <Redirect to='/404' />
+                <Redirect to='/404' from='/' />
                 
                 
             </Switch>

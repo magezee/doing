@@ -9,7 +9,7 @@ import {
 } from '../views'
 
 export const mainRouter = [{
-    pathname: '/Login',
+    pathname: '/login',
     component: Login
 },{
     pathname: '/404',
@@ -21,7 +21,8 @@ export const adminRouter =[{
     component: DashBoard
 },{
     pathname: '/admin/settings',
-    component: Settings
+    component: Settings,
+    
 },{
     pathname: '/admin/article',
     component: ArticleList,
