@@ -1,14 +1,16 @@
-import React,{ Component, Fragment } from 'react'
+import React,{ Component } from 'react'
 import { Route, Switch, Redirect } from 'react-router-dom'
 import { adminRouter } from './routes'
+import {Frame} from './components'
+
+const menus = adminRouter.filter(route => route.isNav === true)
 
 export default class App extends Component {
     render() {
         return(
-            
-            <Fragment>
-                <div>公共服务部分</div>
-                <Switch>
+
+            <Frame menus={menus}>
+                <Switch >
                     {
                         adminRouter.map(route => {
                             return <Route 
@@ -24,7 +26,7 @@ export default class App extends Component {
                     <Redirect to={adminRouter[0].pathname} from='/admin' exact/>
                     <Redirect to='/404'/>
                 </Switch>
-            </Fragment>
+            </Frame>
 
             
         )
