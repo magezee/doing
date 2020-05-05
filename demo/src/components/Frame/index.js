@@ -13,8 +13,13 @@ class Frame extends Component {
     this.props.history.push(key)
     
 	}
+	
+	
 
     render() {
+		const selectedKeysArr = this.props.location.pathname.split('/')
+		selectedKeysArr.length = 3
+
         return (
         <Layout style={{minHeight:'100%'}}>
             <Header className="header ge-header">
@@ -27,7 +32,7 @@ class Frame extends Component {
 				<Menu 
 					mode='inline'
 					onClick={this.onMenuClick}
-					selectedKeys={[this.props.location.pathname]}	// 设置进入页面默认高亮
+					selectedKeys={selectedKeysArr.join('/')}	// 设置进入页面默认高亮
 				>
 					{this.props.menus.map(item => {
 						return (

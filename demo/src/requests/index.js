@@ -33,3 +33,7 @@ export const getArticles = (offset = 0, limited = 10) => {
         limited
     })
 }
+
+export const deleteArticleById = (id) => {
+    return service.post(`/api/v1/articleDelete/${id}`)
+}

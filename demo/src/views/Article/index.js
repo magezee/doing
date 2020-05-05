@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { Card,Button, Table, Tag} from 'antd';
-import {getArticles} from '../../requests/'
+import { Card,Button, Table, Tag, Modal, Typography, message, Tooltip} from 'antd';
+import {getArticles, deleteArticleById} from '../../requests/'
 import dayjs from 'dayjs'
 import ButtonGroup from 'antd/lib/button/button-group';
 import XLSX from 'xlsx'
 
+const { Text } = Typography
 
 const titleDisplayMap = {
     id: 'id',
@@ -14,17 +15,23 @@ const titleDisplayMap = {
     createAt: '创建时间',
 }
 
+
+
 class Article extends Component {
 
     constructor() {
         super()
         this.state = {
-            total:0,
-            dataSource : [],
-            columns : [],
-            isLoading : false,
-            offset: 0,
-            limited: 10
+            total:0,                // 请求数据量
+            dataSource : [],        // 列数据
+            columns : [],           // 列
+            isLoading : false,      // 请勿文章列表等待状态，请求过程中true
+            offset: 0,              // 通过offset和limited来影响表格的当前页数
+            limited: 10,
+            isShowArticleModal:false,   // 删除框是否显示
+            deleteArticleTitle: '',     // 删除框标题
+            deleteArticleConfirmLoading: false,   // 删除框请求过程等待状态
+            deleteArticleId: null   // 文章id放在state达到共享功能
         }
      
     }
@@ -36,10 +43,14 @@ class Article extends Component {
                 return {
                     title: titleDisplayMap[item],   // 对象里使用变量的格式 
                     key: item,
-                    render : (text) => {
+                    // 这里实际上是在<Table>组件内生成<Column title={titleDisplayMap[item]} key={item} render={()=>{...}} > 组件
+                    // 该组件使用render渲染组件时，会回调传回数据被方法形参text、record、index接收
+                    render : (text) => {        
                         const {amount} = text
                         return (
-                            <Tag color={amount > 300 ? 'success' : 'warning'}>{amount}</Tag>
+                            <Tooltip title={amount > 300 ? '高阅读量' : '一般'}>
+                                <Tag color={amount > 300 ? 'success' : 'warning'}>{amount}</Tag>
+                            </Tooltip>
                         )
                     }
 
@@ -47,7 +58,7 @@ class Article extends Component {
             }
             if(item === 'createAt') {
                 return {
-                    title: titleDisplayMap[item],   // 对象里使用变量的格式 
+                    title: titleDisplayMap[item],  
                     key: item,
                     render : (text) => {
                         const {createAt} = text
@@ -69,16 +80,68 @@ class Article extends Component {
         columns.push({
             title: '操作',
             key: 'action',
-            render: () => {
+            render: (text) => {
                 return (
                     <ButtonGroup>
-                        <Button size='small' type='primary'>编辑</Button>
-                        <Button size='small' type='danger'>删除</Button>
+                        {/*点击事件中有形参，需要添加形参时，使用bind()this再加参数*/} 
+                        <Button size='small' type='primary' onClick={this.toEdit.bind(this,text)}>编辑</Button>
+                        <Button size='small' type='danger'onClick={this.showDeleteArticleModal.bind(this,text)}>删除</Button>
                     </ButtonGroup>
                 )
             }
         })
         return columns
+    }
+
+    
+    toEdit = (text) => {
+        
+        this.props.history.push({
+            pathname: `/admin/article/edit/${text.id}`,
+            state: {
+                title: text.title
+            }
+        })
+    }
+
+    showDeleteArticleModal = (text) => {
+
+        this.setState({
+            isShowArticleModal:true,
+            deleteArticleTitle:text.title,
+            deleteArticleId:text.id
+        })
+    }
+    
+
+    // 点击确定，请求开始，开始等待异步执行，异步执行未结束时确定图标状态loading表示，请求结束消息框消失（良好的视觉观感）
+    deleteArticle = () => {
+        this.setState({
+            deleteArticleConfirmLoading: true,  
+        })
+        deleteArticleById(this.state.deleteArticleId)
+            .then(resp => {
+                message.success(resp.msg)
+                this.setState({
+                    offset:0        // 删除后将文章页数返回第一页然后再请求数据
+                },() => {
+                    this.getdata()  
+                })
+            })
+            .finally(() => {
+                this.setState({
+                    deleteArticleConfirmLoading:false,
+                    isShowArticleModal:false
+                })
+            })
+    }
+
+
+    hideDeleteModal = () => {
+        this.setState({
+            isShowArticleModal:false,
+            deleteArticleTitle: ''
+        })
     }
 
     getdata = () => {
@@ -120,6 +183,7 @@ class Article extends Component {
         
     }
     
+
     onShowSizeChange = (current, size) => {
        
         this.setState({
@@ -130,6 +194,8 @@ class Article extends Component {
             this.getdata()
         })
     }
+
+    
 
     toExcel = () => {
         const data = [Object.keys(this.state.dataSource[0])]    // Object.keys返回的是一个数组，即这里已经是[[key1,key2,...]]的嵌套数组结构
@@ -152,11 +218,14 @@ class Article extends Component {
         XLSX.writeFile(wb, 'sheetjs.xlsx')
     }
 
+
     componentDidMount() {
         this.getdata()
     }
 
+
     render() {
+        
         return (
             <div>
                 <div className="site-card-border-less-wrapper">
@@ -178,8 +247,16 @@ class Article extends Component {
                         }} 
                         rowKey={ record => record.id } 
                         loading={ this.state.isLoading }
-                    >    
-                    </Table>
+                    />    
+                    <Modal
+                        title='此操作不可逆，请慎重！'                      
+                        visible={this.state.isShowArticleModal}
+                        onCancel={this.hideDeleteModal}
+                        confirmLoading={this.state.deleteArticleConfirmLoading}
+                        onOk={this.deleteArticle}
+                    >
+                    <span>确定要删除<Text type='danger'>《{this.state.deleteArticleTitle}》</Text>吗？</span>
+                    </Modal>
                     </Card>
                 </div>,
             </div>
