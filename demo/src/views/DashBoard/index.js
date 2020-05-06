@@ -1,11 +1,23 @@
-import React, { Component } from 'react'
+import React, { Component ,createRef} from 'react'
 
 export default class DashBoard extends Component {
-    render() {
-        return (
+    constructor() {
+		super()
+		this.myRef = createRef()
+    }
+    
+    addValue = () => {
+        this.myRef.current.innerHTML = '修改后的数据'
+    }
+
+	render() {
+        
+		return (
             <div>
-                DashBoard
+                <button ref={this.myRef}>value</button>
+                <button onClick={this.addValue}>增加文本框value</button>
             </div>
         )
-    }
+  	}
 }
+

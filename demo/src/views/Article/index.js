@@ -16,7 +16,6 @@ const titleDisplayMap = {
 }
 
 
-
 class Article extends Component {
 
     constructor() {

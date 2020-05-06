@@ -1,8 +1,8 @@
 import React, { Component, createRef } from 'react'
-import {Card, Button, Form, Input } from 'antd'
+import {Card, Button, Form, Input, DatePicker } from 'antd'
 import { UserOutlined, EyeOutlined, FileOutlined } from '@ant-design/icons'
 import E from 'wangeditor'
-
+import './edit.less'
 
 export default class Edit extends Component {
     constructor() {
@@ -18,24 +18,29 @@ export default class Edit extends Component {
           
     onFinishFailed = ({values}) => {
         console.log(values);
+        
     };
 
     onFinish = values => {
       console.log(values);
+     
     };
 
     initEditor = () => {
-        this.editor = new E(this.editorRef)
+        this.editor = new E(this.editorRef.current)
+        this.editor.customConfig.onchange= (html) => {
+      
+        }
         this.editor.create()
     }
 
     componentDidMount() {
-        this.initEditor()
-        
-        
+        this.initEditor()   
+
     }
-    
+
   
+    
 
     render() {
         
@@ -51,38 +56,46 @@ export default class Edit extends Component {
                 extra={<Button onClick={this.goBack}>取消</Button>}
             >
 
-                <Form onFinishFailed={this.onFinishFailed}  onFinish={this.onFinish} {...layout}> 
+                <Form onFinishFailed={this.onFinishFailed}  onFinish={this.onFinish} {...layout} initialValues={{title:'标题',admin:'作者',amount:0}}> 
                 <Form.Item 
                     name='title'
                     label='标题'
                     rules={[{required: true, message: '标题是必须填的'}]}
                 >
-                    <Input prefix={<FileOutlined /> } defaultValue='title'/>
+                    <Input prefix={<FileOutlined /> }  />
                 </Form.Item>
                 <Form.Item 
                     name='admin'
                     label='作者'
                     rules={[{required: true, message: '作者是必须填的'}]}
                 >
-                    <Input prefix={<UserOutlined/> } defaultValue='admin'/>
+                    <Input prefix={<UserOutlined/> } />
                 </Form.Item>
                 <Form.Item 
                     name='amount'
                     label='阅读量'
                     rules={[{required: true, message: 'amount'}]}
                 >
-                    <Input prefix={<EyeOutlined /> } defaultValue='0'/>
+                    <Input prefix={<EyeOutlined /> } />
+                </Form.Item>
+                <Form.Item 
+                    name='creactAt'
+                    label='日期'
+                    rules={[{required: true, message: 'creatAt'}]}
+                >
+                    <DatePicker/>
                 </Form.Item>
                 <Form.Item 
                     name='content'
                     label='内容'  
+                   
                 >
-                   <div ref={this.editorRef}></div>
+                   <div  className='rich-text-field'  ref={this.editorRef}></div>
                 </Form.Item>
-                <Form.Item wrapperCol={ {offset:2}}>
+                <Form.Item wrapperCol={ {offset:2}} >
                     <Button    type="primary" htmlType="summit" >
-                        Submit
-                        </Button>
+                        保存修改
+                    </Button>
                 </Form.Item>
 
                 </Form >
