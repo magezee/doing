@@ -1,14 +1,23 @@
 import React, { Component, createRef } from 'react'
+
 import {Card, Button, Form, Input, DatePicker } from 'antd'
 import { UserOutlined, EyeOutlined, FileOutlined } from '@ant-design/icons'
 import E from 'wangeditor'
+import moment from 'moment'
+
+import { getArticleById } from '../../requests/'
+
 import './edit.less'
 
 export default class Edit extends Component {
     constructor() {
         super()
         this.editorRef = createRef()
-       
+        this.formRef=createRef()
+    }
+
+    test = () => {
+        console.log(this.formRef.current)
     }
 
     goBack = () => {
@@ -26,21 +35,44 @@ export default class Edit extends Component {
      
     };
 
+    handleSubmit = (e) => {
+        console.log(this.formRef.current.getFieldValue('createAt').valueOf())
+        this.formRef.current.setFieldsValue({admin:'11'})
+        this.formRef.current.submit()
+    }
+
     initEditor = () => {
         this.editor = new E(this.editorRef.current)
         this.editor.customConfig.onchange= (html) => {
-      
+            this.formRef.current.setFieldsValue({
+                content:html
+            })
+
         }
         this.editor.create()
     }
 
     componentDidMount() {
-        this.initEditor()   
+        this.initEditor()
+        
+        getArticleById(this.props.match.params.id)  
+        
+            .then(resp => {
+               
+                this.formRef.current.setFieldsValue({
+                    title:resp.title,
+                    author:resp.author,
+                    amount:resp.amount,
+                    createAt:moment(resp.createAt),
+                    content:this.editor.txt.html(resp.content)
+                })
+            })
 
+            
+            
     }
 
-  
-    
+
 
     render() {
         
@@ -54,9 +86,8 @@ export default class Edit extends Component {
                 title='编辑文章'
                 bordered={false}
                 extra={<Button onClick={this.goBack}>取消</Button>}
-            >
-
-                <Form onFinishFailed={this.onFinishFailed}  onFinish={this.onFinish} {...layout} initialValues={{title:'标题',admin:'作者',amount:0}}> 
+            >                
+                <Form onFinishFailed={this.onFinishFailed}  onFinish={this.onFinish} {...layout} initialValues={{title:'标题',admin:'作者',amount:0}} ref={this.formRef}> 
                 <Form.Item 
                     name='title'
                     label='标题'
@@ -68,6 +99,7 @@ export default class Edit extends Component {
                     name='admin'
                     label='作者'
                     rules={[{required: true, message: '作者是必须填的'}]}
+                    
                 >
                     <Input prefix={<UserOutlined/> } />
                 </Form.Item>
@@ -79,21 +111,22 @@ export default class Edit extends Component {
                     <Input prefix={<EyeOutlined /> } />
                 </Form.Item>
                 <Form.Item 
-                    name='creactAt'
+                    name='createAt'
                     label='日期'
-                    rules={[{required: true, message: 'creatAt'}]}
+                    rules={[{required: true, message: 'createAt'}]}
                 >
                     <DatePicker/>
                 </Form.Item>
                 <Form.Item 
                     name='content'
                     label='内容'  
-                   
+                    
                 >
-                   <div  className='rich-text-field'  ref={this.editorRef}></div>
+                   <div  className='rich-text-field'  ref={this.editorRef} ></div>
+                   
                 </Form.Item>
                 <Form.Item wrapperCol={ {offset:2}} >
-                    <Button    type="primary" htmlType="summit" >
+                    <Button  htmlType='button'  onClick={this.handleSubmit} >
                         保存修改
                     </Button>
                 </Form.Item>

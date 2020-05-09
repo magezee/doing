@@ -17,7 +17,7 @@ render(
                 <Switch>
                     <Route  path='/admin' render={(routerProps)=>{
                         // 权限，需要登入才能访问/admin
-                        return <App {...routerProps}/>
+                        return <App  {...routerProps}/>
                     }}/>  
                     {
                         mainRouter.map(route => {

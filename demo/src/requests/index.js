@@ -27,6 +27,7 @@ service.interceptors.response.use((resp) => {
     }
 })
 
+// 获取文章列表
 export const getArticles = (offset = 0, limited = 10) => {
     return service.post('/api/v1/articleList',{
         offset,
@@ -34,6 +35,14 @@ export const getArticles = (offset = 0, limited = 10) => {
     })
 }
 
+// 通过id删除文章
 export const deleteArticleById = (id) => {
     return service.post(`/api/v1/articleDelete/${id}`)
+}
+
+//id获取文章
+
+
+export const getArticleById = (id) => {
+    return service.post(`/api/v1/article/${id}`)
 }
